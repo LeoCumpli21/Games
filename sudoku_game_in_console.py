@@ -22,15 +22,13 @@ board2 = [
     [0, 4, 9, 2, 0, 6, 0, 0, 7],
 ]
 
-# dictionarie whose keys are the coordinates of
-# the elmts in board that are different to 0
-
-db = {}
-
-for i in range(len(board2)):
-    for j in range(len(board2)):
-        if board2[i][j] != 0:
-            db[(i, j)] = board2[i][j]
+# Coordinates on the board that have non zero values
+non_zero = [
+    (i, j)
+    for i in range(len(board2))
+    for j in range(len(board2))
+    if board2[i][j] != 0
+]
 
 
 def solve(bo):
@@ -124,7 +122,7 @@ def ask_user():
     sudoku."""
 
     user_input = input(
-        """Give the coordenates and value to insert on the sudoku, 
+        """\nGive the coordenates and value to insert on the sudoku, 
     with the form row, col, val: \n"""
     )
     valid = is_valid_input(user_input)
@@ -144,13 +142,13 @@ def is_on_board(row, col):
     A blocked value is a value different from 0 already on the board
     when the game started."""
 
-    if (row, col) in db:
+    if (row, col) in non_zero:
         return True
     return False
 
 
 def insert_value(row, col, val, bo):
-    """Inserts the given value into the board on the given coordinates"""
+    """Inserts the given value into the board in the given coordinates"""
 
     bo[row][col] = val
     return bo
