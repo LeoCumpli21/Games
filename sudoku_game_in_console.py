@@ -22,6 +22,16 @@ board2 = [
     [0, 4, 9, 2, 0, 6, 0, 0, 7],
 ]
 
+# dictionarie whose keys are the coordinates of
+# the elmts in board that are different to 0
+
+db = {}
+
+for i in range(len(board2)):
+    for j in range(len(board2)):
+        if board2[i][j] != 0:
+            db[(i, j)] = board2[i][j]
+
 
 def solve(bo):
     """The algorith that's gonna backtrack"""
@@ -112,22 +122,35 @@ def ask_user():
     return row, col, val
 
 
-def insert_value(row, col, val, bo):
-    bo[row][col] = val
+def is_on_board(row, col):
+    """Check whether in the given coordinates is a blocked value.
+    A blocked value is a value different from 0 already on the board
+    when the game started."""
+    if (row, col) in db:
+        return True
+    return False
 
+
+def insert_value(row, col, val, bo):
+    """Inserts the given value into the board on the given coordinates"""
+    bo[row][col] = val
     return bo
 
 
 # Computer solves board 1
 solve(board1)
 
-# This while loop ends when the board is completed
+# This while loop ends when board2 is completed
 # correctly by the user
+# Completed means equal to board1
 while board2 != board1:
-
     print_board(board2)
     row, col, val = ask_user()
-    insert_value(row, col, val, board2)
+
+    if is_on_board(row, col):
+        print("\nThat coordinate is blocked; try again")
+    else:
+        insert_value(row, col, val, board2)
 
 print_board(board2)
 print("""Congrats, You've completed the sudoku board successfully""")
