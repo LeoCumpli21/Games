@@ -34,7 +34,7 @@ for i in range(len(board2)):
 
 
 def solve(bo):
-    """The algorith that's gonna backtrack"""
+    """The algorithm that's gonna backtrack"""
     find = find_empty(bo)
 
     if not find:
@@ -55,7 +55,7 @@ def solve(bo):
 
 
 def is_valid(bo, num, pos):
-    """Returns bollean expresion whether inserting some number
+    """Returns boolean expresion whether inserting some number
     in an empty space is valid or not"""
 
     # Check whether the number is already in the current row
@@ -106,26 +106,44 @@ def find_empty(bo):
     return None
 
 
+def is_valid_input(s_input):
+    """Returns True if s_input is in the correct format.
+    i.e. 'row, col, val'. If not, returns false."""
+
+    try:
+        row, col, val = tuple([int(elem) for elem in s_input.split(",")])
+    except:
+        return False
+    if (row < 0 or row > 8) or (col < 0 or col > 8) or (val < 1 or val > 9):
+        return False
+    return True
+
+
 def ask_user():
     """Asks the user for the row, col, and val to insert on the
-    sudoku"""
+    sudoku."""
 
-    row, col, val = tuple(
-        [
-            int(elem)
-            for elem in input(
-                """Give the coordenates and value to insert on the sudoku, 
-        with the form row, col, val: \n"""
-            ).split(",")
-        ]
+    user_input = input(
+        """Give the coordenates and value to insert on the sudoku, 
+    with the form row, col, val: \n"""
     )
+    valid = is_valid_input(user_input)
+
+    while not valid:
+        user_input = input(
+            """Incorrect input. Please enter it with the form row, col, val\n"""
+        )
+        valid = is_valid_input(user_input)
+
+    row, col, val = tuple([int(elem) for elem in user_input.split(",")])
     return row, col, val
 
 
 def is_on_board(row, col):
-    """Check whether in the given coordinates is a blocked value.
+    """Checks whether in the given coordinates is a blocked value.
     A blocked value is a value different from 0 already on the board
     when the game started."""
+
     if (row, col) in db:
         return True
     return False
@@ -133,6 +151,7 @@ def is_on_board(row, col):
 
 def insert_value(row, col, val, bo):
     """Inserts the given value into the board on the given coordinates"""
+
     bo[row][col] = val
     return bo
 
