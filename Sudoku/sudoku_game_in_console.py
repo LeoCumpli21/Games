@@ -100,7 +100,7 @@ def ask_user():
     sudoku."""
 
     user_input = input(
-        """\nGive the coordenates and value to insert on the sudoku, 
+        """\nGive the coordinates and value to insert on the sudoku, 
     with the form row, col, val: \n"""
     )
     valid = is_valid_input(user_input)
@@ -132,12 +132,37 @@ def insert_value(row, col, val, bo):
     return bo
 
 
+def help(coordinates):
+    """Receives a list of non-blocked coordinates. Chooses randomly for
+    a coordinate in the board, and inserts the correct value in it.
+    Returns a tuple of the form (row, col, val) of a random non-blocked
+    value coordinate"""
+
+    row, col = choice(coordinates)
+    insert_value(row, col, solved_board[row][col], user_board)
+    coordinates.pop(coordinates.index((row, col)))
+    return (row, col, solved_board[row][col])
+
+
+def clue(coordinates, computer_bo, user_bo):
+    """Receives a list of non-blocked coordinates, the solved
+    board, and the user board. Returns all coordinates
+    the user has inserted a wrong value"""
+
+    wrong_coo = []
+    for i, j in coordinates:
+        if user_bo[i][j] != 0 and computer_bo[i][j] != user_bo[i][j]:
+            wrong_coo.append((i, j))
+    return wrong_coo
+
+
 boards_file = open("boards.txt", "r")
 boards = boards_file.readlines()
 
 solved_board = []
 user_board = []
 
+a_clue = None
 
 inicio = int(input("\nPress 1 to begin, or any other key to stop the game: "))
 
@@ -151,25 +176,25 @@ if inicio == 1:
     # Verificar que el usuario elija mode adecuada
     while not valid:
 
-        mode = input("\nElija la mode que desea (introduzca el número): ")
+        mode = input("\nChoose a difficulty: (Enter the number of the mode): ")
         try:
             mode = int(mode)
         except:
-            print("Ingrese el número de la mode\n")
+            print("Choose a valid mode number\n")
             continue
 
         chosen_board = None
         # Elejir un chosen_board de cierta mode de manera aleatoria.
         if mode == 1:
             chosen_board = choice(boards[:3]).rstrip().replace(" ", "")
-            pista = 0
+            a_clue = 0
         elif mode == 2:
             chosen_board = choice(boards[3:6]).rstrip().replace(" ", "")
-            pista = 0
+            a_clue = 0
         elif mode == 3:
             chosen_board = choice(boards[6:]).rstrip().replace(" ", "")
         else:
-            print("Dificultad inválida, inténtelo de nuevo\n")
+            print("Invalid mode, try again\n")
             continue
         # Formateamos el chosen_board para poder iterar sobre él
         chosen_board = chosen_board[chosen_board.find("[") :]
@@ -198,12 +223,19 @@ else:
 
 boards_file.close()
 
-# Coordinates on the board that have non zero values
+# Coordinates in the board that have non zero values
 non_zero = [
     (i, j)
     for i in range(len(user_board))
     for j in range(len(user_board))
     if user_board[i][j] != 0
+]
+# Coordinates in the board that have zero values
+non_blocked = [
+    (i, j)
+    for i in range(len(solved_board))
+    for j in range(len(solved_board))
+    if solved_board[i][j] == 0
 ]
 
 # Computer solves board 1
@@ -214,12 +246,37 @@ solve(solved_board)
 # Completed means equal to solved_board
 while user_board != solved_board:
     print_board(user_board)
+
+    if mode == 1 and (a_clue % 5 == 0 and a_clue != 0):
+        some_clue = input(
+            "Do you want to the computer to fill an empty box? (Y/N): "
+        )
+        if some_clue.lower() == "y":
+            row, col, val = help(non_blocked)
+            print(
+                f"\nThe value {val} was inserted into row {row} and column {col}\n"
+            )
+            print_board(user_board)
+
+    elif mode == 2 and (a_clue % 5 == 0 and a_clue != 0):
+        some_clue = input("Do you want a clue? (Y/N): ")
+        if some_clue.lower() == "y":
+            wrong_coos = clue(non_blocked, solved_board, user_board)
+            for coo in wrong_coos:
+                print(
+                    f"In coordinate {coo} the value {user_board[coo[0]][coo[1]]} is incorrect"
+                )
+
     row, col, val = ask_user()
 
     if is_on_board(row, col):
-        print("\nThat coordinate is blocked; try again")
+        print("\nThat box can't be changed, try again")
     else:
         insert_value(row, col, val, user_board)
+        limpia()
+        print("\nValue inserted\n")
+
+    a_clue += 1
 
 print_board(user_board)
 print("""Congrats, You've completed the sudoku board successfully""")
