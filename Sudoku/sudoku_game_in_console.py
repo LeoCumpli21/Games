@@ -1,34 +1,12 @@
-board1 = [
-    [7, 8, 0, 4, 0, 0, 1, 2, 0],
-    [6, 0, 0, 0, 7, 5, 0, 0, 9],
-    [0, 0, 0, 6, 0, 1, 0, 7, 8],
-    [0, 0, 7, 0, 4, 0, 2, 6, 0],
-    [0, 0, 1, 0, 5, 0, 9, 3, 0],
-    [9, 0, 4, 0, 6, 0, 0, 0, 5],
-    [0, 7, 0, 3, 0, 0, 0, 1, 2],
-    [1, 2, 0, 0, 0, 7, 4, 0, 0],
-    [0, 4, 9, 2, 0, 6, 0, 0, 7],
-]
+import os
+from random import choice
 
-board2 = [
-    [7, 8, 0, 4, 0, 0, 1, 2, 0],
-    [6, 0, 0, 0, 7, 5, 0, 0, 9],
-    [0, 0, 0, 6, 0, 1, 0, 7, 8],
-    [0, 0, 7, 0, 4, 0, 2, 6, 0],
-    [0, 0, 1, 0, 5, 0, 9, 3, 0],
-    [9, 0, 4, 0, 6, 0, 0, 0, 5],
-    [0, 7, 0, 3, 0, 0, 0, 1, 2],
-    [1, 2, 0, 0, 0, 7, 4, 0, 0],
-    [0, 4, 9, 2, 0, 6, 0, 0, 7],
-]
 
-# Coordinates on the board that have non zero values
-non_zero = [
-    (i, j)
-    for i in range(len(board2))
-    for j in range(len(board2))
-    if board2[i][j] != 0
-]
+def limpia():
+    if os.name == "nt":
+        os.system("cls")
+    else:
+        os.system("clear")
 
 
 def solve(bo):
@@ -154,20 +132,94 @@ def insert_value(row, col, val, bo):
     return bo
 
 
-# Computer solves board 1
-solve(board1)
+boards_file = open("boards.txt", "r")
+boards = boards_file.readlines()
 
-# This while loop ends when board2 is completed
+solved_board = []
+user_board = []
+
+
+inicio = int(input("\nPress 1 to begin, or any other key to stop the game: "))
+
+if inicio == 1:
+    limpia()
+    print("\Modes:")
+    print("\n1.- Easy.")
+    print("\n2.- Intermediate.")
+    print("\n3.- Hard.")
+    valid = False
+    # Verificar que el usuario elija mode adecuada
+    while not valid:
+
+        mode = input("\nElija la mode que desea (introduzca el número): ")
+        try:
+            mode = int(mode)
+        except:
+            print("Ingrese el número de la mode\n")
+            continue
+
+        chosen_board = None
+        # Elejir un chosen_board de cierta mode de manera aleatoria.
+        if mode == 1:
+            chosen_board = choice(boards[:3]).rstrip().replace(" ", "")
+            pista = 0
+        elif mode == 2:
+            chosen_board = choice(boards[3:6]).rstrip().replace(" ", "")
+            pista = 0
+        elif mode == 3:
+            chosen_board = choice(boards[6:]).rstrip().replace(" ", "")
+        else:
+            print("Dificultad inválida, inténtelo de nuevo\n")
+            continue
+        # Formateamos el chosen_board para poder iterar sobre él
+        chosen_board = chosen_board[chosen_board.find("[") :]
+        chosen_board = chosen_board.split(",")
+        chosen_board = "".join(chosen_board)[1:-1].split("[")[1:]
+        # Creamos la matriz que completará la computadora
+        for elem in chosen_board:
+            ren = []
+            for num in elem:
+                if num != "]":
+                    ren.append(int(num))
+            solved_board.append(ren)
+        # Misma matriz -> esta la completa el usuario
+        for elem in chosen_board:
+            ren = []
+            for num in elem:
+                if num != "]":
+                    ren.append(int(num))
+            user_board.append(ren)
+
+        valid = True
+    limpia()
+else:
+    limpia()
+    quit()
+
+boards_file.close()
+
+# Coordinates on the board that have non zero values
+non_zero = [
+    (i, j)
+    for i in range(len(user_board))
+    for j in range(len(user_board))
+    if user_board[i][j] != 0
+]
+
+# Computer solves board 1
+solve(solved_board)
+
+# This while loop ends when user_board is completed
 # correctly by the user
-# Completed means equal to board1
-while board2 != board1:
-    print_board(board2)
+# Completed means equal to solved_board
+while user_board != solved_board:
+    print_board(user_board)
     row, col, val = ask_user()
 
     if is_on_board(row, col):
         print("\nThat coordinate is blocked; try again")
     else:
-        insert_value(row, col, val, board2)
+        insert_value(row, col, val, user_board)
 
-print_board(board2)
+print_board(user_board)
 print("""Congrats, You've completed the sudoku board successfully""")
