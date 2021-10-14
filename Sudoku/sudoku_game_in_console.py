@@ -276,7 +276,8 @@ while user_board != solved_board:
         limpia()
         print("\nValue inserted\n")
 
-    a_clue += 1
+    if mode == 1 or mode == 2:
+        a_clue += 1
 
 print_board(user_board)
 print("""Congrats, You've completed the sudoku board successfully""")
